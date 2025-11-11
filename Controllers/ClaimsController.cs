@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +8,6 @@ using ContractMonthlyClaimSystem.Services;
 using System.Security.Claims;
 using CMCSClaim = ContractMonthlyClaimSystem.Models.Claim;
 
-
 namespace ContractMonthlyClaimSystem.Controllers
 {
     [Authorize]
@@ -17,7 +16,6 @@ namespace ContractMonthlyClaimSystem.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IFileUploadService _fileUploadService;
-
 
         public ClaimsController(ApplicationDbContext context,
                               UserManager<ApplicationUser> userManager,
@@ -32,13 +30,22 @@ namespace ContractMonthlyClaimSystem.Controllers
         [Authorize(Roles = "Lecturer")]
         public async Task<IActionResult> Create()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user != null)
+            try
             {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return RedirectToAction("Login", "Identity");
+                }
+
                 ViewBag.User = user;
+                return View(new CMCSClaim { HoursWorked = 0 });
             }
-            var claim = new CMCSClaim { HoursWorked = 0 };
-            return View();
+            catch (Exception ex)
+            {
+                // Log the exception
+                return RedirectToAction("Index", "Home");
+            }
         }
 
         // POST: Claims/Create
