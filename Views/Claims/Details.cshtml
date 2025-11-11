@@ -1,0 +1,135 @@
+﻿@model ContractMonthlyClaimSystem.Models.Claim
+
+
+@{
+    ViewData["Title"] = "Claim Details";
+}
+
+<h2>Claim Details</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Claim Information</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Claim ID:</dt>
+                    <dd class="col-sm-8">@Model.ClaimID</dd>
+
+                    <dt class="col-sm-4">Lecturer:</dt>
+                    <dd class="col-sm-8">@Model.User?.FullName</dd>
+
+                    <dt class="col-sm-4">Hours Worked:</dt>
+                    <dd class="col-sm-8">@Model.HoursWorked</dd>
+
+                    <dt class="col-sm-4">Total Amount:</dt>
+                    <dd class="col-sm-8">R @Model.TotalAmount.ToString("F2")</dd>
+
+                    <dt class="col-sm-4">Submission Date:</dt>
+                    <dd class="col-sm-8">@Model.SubmissionDate.ToString("yyyy-MM-dd")</dd>
+
+                    <dt class="col-sm-4">Current Status:</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge
+                            @(Model.CurrentStatus?.StatusName == "Submitted" ? "bg-warning" :
+                                                            Model.CurrentStatus?.StatusName == "ApprovedByCoordinator" ? "bg-info" :
+                                                            Model.CurrentStatus?.StatusName == "ApprovedByManager" ? "bg-success" :
+                                                            Model.CurrentStatus?.StatusName == "Rejected" ? "bg-danger" : "bg-secondary")">
+                            @Model.CurrentStatus?.StatusName
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-4">Notes:</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.Notes) ? "No notes" : Model.Notes)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Supporting Documents</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.SupportingDocuments?.Any() == true)
+                {
+                    <ul class="list-group">
+                        @foreach (var doc in Model.SupportingDocuments)
+                        {
+                            <li class="list-group-item">
+                                <i class="fas fa-file"></i> @doc.FileName
+                                <small class="text-muted">(Uploaded: @doc.UploadDate.ToString("yyyy-MM-dd"))</small>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">No supporting documents uploaded.</p>
+                }
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Status History</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.StatusHistory?.Any() == true)
+                {
+                    <div class="timeline">
+                        @foreach (var history in Model.StatusHistory.OrderBy(h => h.ChangeDate))
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <strong>@history.Status?.StatusName</strong>
+                                    <br />
+                                    <small>By: @history.ChangedByUser?.FullName</small>
+                                    <br />
+                                    <small>Date: @history.ChangeDate.ToString("yyyy-MM-dd HH:mm")</small>
+                                    @if (!string.IsNullOrEmpty(history.Notes))
+                                    {
+                                        <br />
+                                        <small>Note: @history.Notes</small>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No status history available.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
+</div>
+
+<style>
+    .timeline {
+        border-left: 2px solid #007bff;
+        padding-left: 15px;
+    }
+    .timeline-item {
+        margin-bottom: 15px;
+        position: relative;
+    }
+    .timeline-marker {
+        position: absolute;
+        left: -20px;
+        top: 5px;
+        width: 10px;
+        height: 10px;
+        background: #007bff;
+        border-radius: 50%;
+    }
+</style>

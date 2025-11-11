@@ -1,0 +1,77 @@
+﻿@model IEnumerable<ContractMonthlyClaimSystem.Models.Claim>
+
+
+@{
+    ViewData["Title"] = "Coordinator Dashboard";
+}
+
+<h2>Pending Claims for Approval</h2>
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Lecturer</th>
+                    <th>Hours</th>
+                    <th>Amount</th>
+                    <th>Submission Date</th>
+                    <th>Documents</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var claim in Model)
+                {
+                    <tr>
+                        <td>@claim.User.FullName</td>
+                        <td>@claim.HoursWorked</td>
+                        <td>R @claim.TotalAmount.ToString("F2")</td>
+                        <td>@claim.SubmissionDate.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            @if (claim.SupportingDocuments.Any())
+                            {
+                                <span class="badge bg-success">@claim.SupportingDocuments.Count</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">None</span>
+                            }
+                        </td>
+                        <td>
+                            <button onclick="updateClaimStatus(@claim.ClaimID, 2)" class="btn btn-sm btn-success">Approve</button>
+                            <button onclick="updateClaimStatus(@claim.ClaimID, 4)" class="btn btn-sm btn-danger">Reject</button>
+                            <a asp-action="Details" asp-route-id="@claim.ClaimID" class="btn btn-sm btn-outline-primary">Details</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <p>No pending claims for approval.</p>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function updateClaimStatus(claimId, statusId) {
+            if (confirm('Are you sure you want to update this claim?')) {
+                $.post('@Url.Action("UpdateStatus", "Claims")', {
+                    claimId: claimId,
+                    newStatusId: statusId
+                }, function(data) {
+                    if (data.success) {
+                        location.reload(); // Refresh to show updated list
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
+            }
+        }
+    </script>
+}

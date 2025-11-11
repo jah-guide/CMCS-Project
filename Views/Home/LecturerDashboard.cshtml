@@ -1,0 +1,86 @@
+﻿@model IEnumerable<ContractMonthlyClaimSystem.Models.Claim>
+@using ContractMonthlyClaimSystem.Models
+
+
+@if (ViewBag.Success != null)
+{
+    <div class="alert alert-success">@ViewBag.Success</div>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
+@{
+    ViewData["Title"] = "Lecturer Dashboard";
+    var user = ViewBag.User as ApplicationUser;
+}
+
+<h2>Welcome, @user.FullName</h2>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Hourly Rate</h5>
+                <p class="card-text h4">R @user.HourlyRate.ToString("F2")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <a asp-action="Create" asp-controller="Claims" class="btn btn-success btn-lg">
+            <i class="fas fa-plus"></i> Submit New Claim
+        </a>
+    </div>
+</div>
+
+<h4>My Claims History</h4>
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Claim ID</th>
+                    <th>Submission Date</th>
+                    <th>Hours Worked</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var claim in Model)
+                {
+                    <tr>
+                        <td>@claim.ClaimID</td>
+                        <td>@claim.SubmissionDate.ToString("yyyy-MM-dd")</td>
+                        <td>@claim.HoursWorked</td>
+                        <td>R @claim.TotalAmount.ToString("F2")</td>
+                        <td>
+                            <span class="badge
+                                        @(claim.CurrentStatus.StatusName == "Submitted" ? "bg-warning" :
+                                                                    claim.CurrentStatus.StatusName == "ApprovedByCoordinator" ? "bg-info" :
+                                                                    claim.CurrentStatus.StatusName == "ApprovedByManager" ? "bg-success" :
+                                                                    claim.CurrentStatus.StatusName == "Rejected" ? "bg-danger" : "bg-secondary")">
+                        @claim.CurrentStatus.StatusName
+                    </span>
+                </td>
+                <td>
+                    <a asp-action="Details" asp-controller="Claims" asp-route-id="@claim.ClaimID"
+                       class="btn btn-sm btn-outline-primary">View Details</a>
+                </td>
+            </tr>
+                        }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <p>You haven't submitted any claims yet.</p>
+    </div>
+}
