@@ -1,3 +1,4 @@
+// File: Program.cs - ADD THESE LINES
 using Microsoft.EntityFrameworkCore;
 using ContractMonthlyClaimSystem.Data;
 using Microsoft.AspNetCore.Identity;
@@ -26,7 +27,12 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllersWithViews();
+
+// ADD THESE SERVICE REGISTRATIONS
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<IReportService, ReportService>();
+// Add to Program.cs
+builder.Services.AddScoped<IClaimAutomationService, ClaimAutomationService>();
 
 var app = builder.Build();
 
