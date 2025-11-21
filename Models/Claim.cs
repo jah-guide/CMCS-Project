@@ -1,29 +1,36 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContractMonthlyClaimSystem.Models
 {
-    public class ClaimStatusHistory
+    public class Claim
     {
-        public int ClaimStatusHistoryID { get; set; }
-
-        [Required]
         public int ClaimID { get; set; }
 
         [Required]
-        public int StatusID { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
         [Required]
-        public string ChangedByUserId { get; set; } = string.Empty;
+        [Range(1, 200)]
+        public int HoursWorked { get; set; }
 
         [Required]
-        public DateTime ChangeDate { get; set; } = DateTime.Now;
+        [DataType(DataType.Currency)]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalAmount { get; set; }
+
+        [Required]
+        public DateTime SubmissionDate { get; set; } = DateTime.Now;
+
+        public int CurrentStatusID { get; set; }
 
         [StringLength(500)]
         public string? Notes { get; set; }
 
         // Navigation properties - make them nullable
-        public virtual Claim? Claim { get; set; }
-        public virtual Status? Status { get; set; }
-        public virtual ApplicationUser? ChangedByUser { get; set; }
+        public virtual ApplicationUser? User { get; set; }
+        public virtual Status? CurrentStatus { get; set; }
+        public virtual ICollection<SupportingDocument>? SupportingDocuments { get; set; }
+        public virtual ICollection<ClaimStatusHistory>? StatusHistory { get; set; }
     }
 }
