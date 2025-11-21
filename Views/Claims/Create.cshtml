@@ -1,7 +1,9 @@
+<!-- File: Views/Claims/Create.cshtml - ENHANCED VERSION -->
 @model ContractMonthlyClaimSystem.Models.Claim
 
 @{
     ViewData["Title"] = "Submit New Claim";
+    var user = ViewBag.User as ContractMonthlyClaimSystem.Models.ApplicationUser;
 }
 
 <h2>Submit New Claim</h2>
@@ -18,45 +20,127 @@
 
 <div class="row">
     <div class="col-md-6">
+        <div id="notificationContainer"></div>
         <form method="post" enctype="multipart/form-data" id="claimForm">
             @Html.AntiForgeryToken()
 
+            <!-- Enhanced Hours Worked with Real-time Validation -->
             <div class="mb-3">
                 <label for="HoursWorked" class="form-label">Hours Worked *</label>
                 <input type="number" id="HoursWorked" name="HoursWorked" class="form-control"
-                       required min="1" max="200" value="@(Model?.HoursWorked ?? 0)" />
+                       required min="1" max="200" value="@(Model?.HoursWorked ?? 0)"
+                       oninput="calculateTotal()" />
+                <div id="HoursWorkedFeedback" class="form-text"></div>
                 <span class="text-danger field-validation-valid" data-valmsg-for="HoursWorked" data-valmsg-replace="true"></span>
             </div>
 
-            <div class="mb-3">
-                <label for="Notes" class="form-label">Notes (Optional)</label>
-                <textarea id="Notes" name="Notes" class="form-control" rows="3">@Model?.Notes</textarea>
+            <!-- Real-time Calculation Display -->
+            <div class="card mb-3" id="calculationCard" style="display: none;">
+                <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-calculator"></i> Real-time Calculation
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Hourly Rate</small>
+                            <div id="HourlyRateDisplay">R @(user?.HourlyRate.ToString("F2") ?? "0.00")</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Hours Worked</small>
+                            <div id="HoursWorkedDisplay">0</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <strong>Total Amount:</strong>
+                            <div id="TotalAmountPreview" class="h5 text-success">R 0.00</div>
+                        </div>
+                    </div>
+                    <div class="mt-3" id="historySection" style="display: none;">
+                        <h6 class="border-bottom pb-1">Recent Calculations</h6>
+                        <div id="calculationHistory"></div>
+                    </div>
+                </div>
             </div>
 
+            <!-- Enhanced Notes with Character Counter -->
+            <div class="mb-3">
+                <label for="Notes" class="form-label">Notes (Optional)</label>
+                <textarea id="Notes" name="Notes" class="form-control" rows="3"
+                          maxlength="500" oninput="updateCharacterCount()">@Model?.Notes</textarea>
+                <div class="form-text">
+                    <span id="charCount">0</span>/500 characters
+                </div>
+            </div>
+
+            <!-- Enhanced File Upload with Preview -->
             <div class="mb-3">
                 <label for="supportingDocuments" class="form-label">Supporting Documents</label>
-                <input type="file" id="supportingDocuments" name="supportingDocuments" multiple class="form-control" />
+                <input type="file" id="supportingDocuments" name="supportingDocuments" multiple
+                       class="form-control" onchange="previewFiles()" />
                 <small class="form-text text-muted">Allowed files: PDF, DOCX, XLSX, JPG, PNG (Max 5MB each)</small>
+
+                <!-- File Preview -->
+                <div id="filePreview" class="mt-2" style="display: none;">
+                    <h6>Selected Files:</h6>
+                    <ul id="fileList" class="list-group"></ul>
+                </div>
+
+
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <small class="text-muted" id="totalSize"></small>
+                    <small class="text-muted" id="fileCount"></small>
+                </div>
+            </div>
+
+            <!-- Form Validation Summary -->
+            <div id="validationSummary" class="alert alert-warning" style="display: none;">
+                <h6>Please fix the following issues:</h6>
+                <ul id="validationErrors"></ul>
             </div>
 
             <div class="mt-3">
-                <button type="submit" class="btn btn-primary">Submit Claim</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Submit Claim
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="saveAsDraft()">
+                    <i class="fas fa-save"></i> Save as Draft
+                </button>
                 <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>
 
     <div class="col-md-6">
+        <!-- Enhanced Profile Information -->
         <div class="card">
             <div class="card-header">
-                <h5>Your Profile Information</h5>
+                <h5><i class="fas fa-user-circle"></i> Your Profile Information</h5>
             </div>
             <div class="card-body">
-                @if (ViewBag.User != null)
+                @if (user != null)
                 {
-                    <p><strong>Hourly Rate:</strong> R @ViewBag.User.HourlyRate.ToString("F2")</p>
-                    <p><strong>Total will be calculated as:</strong> Hours Worked × Hourly Rate</p>
-                    <p class="text-muted"><small>Example: 10 hours × R @ViewBag.User.HourlyRate.ToString("F2") = R @(ViewBag.User.HourlyRate * 10)</small></p>
+                    <p><strong>Hourly Rate:</strong> R @user.HourlyRate.ToString("F2")</p>
+                    <p><strong>Calculation Formula:</strong> Hours Worked × Hourly Rate</p>
+
+                    <!-- Quick Calculation Examples -->
+                    <div class="mt-3">
+                        <h6>Quick Examples:</h6>
+                        <div class="list-group">
+                            <button type="button" class="list-group-item list-group-item-action" onclick="setHours(10)">
+                                10 hours = R @(user.HourlyRate * 10)
+                            </button>
+                            <button type="button" class="list-group-item list-group-item-action" onclick="setHours(20)">
+                                20 hours = R @(user.HourlyRate * 20)
+                            </button>
+                            <button type="button" class="list-group-item list-group-item-action" onclick="setHours(40)">
+                                40 hours = R @(user.HourlyRate * 40)
+                            </button>
+                        </div>
+                    </div>
                 }
                 else
                 {
@@ -67,24 +151,439 @@
                 }
             </div>
         </div>
+
+        <!-- Validation Rules -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Validation Rules</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Hours must be between 1-200</li>
+                    <li><i class="fas fa-check text-success"></i> Maximum 5 files allowed</li>
+                    <li><i class="fas fa-check text-success"></i> Each file max 5MB</li>
+                    <li><i class="fas fa-check text-success"></i> Supported formats: PDF, DOCX, XLSX, JPG, PNG</li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
-            console.log("Create page loaded");
+        // Calculation history
+        let calculationHistory = [];
+        function addToHistory(hours, amount) {
+            const entry = {
+                hours: hours,
+                amount: amount,
+                timestamp: new Date().toLocaleTimeString()
+            };
 
-            // Simple form validation
-            $('#claimForm').on('submit', function(e) {
-                const hours = $('#HoursWorked').val();
-                if (!hours || hours < 1 || hours > 200) {
-                    alert('Please enter valid hours worked (1-200)');
-                    e.preventDefault();
-                    return false;
+            calculationHistory.unshift(entry);
+            calculationHistory = calculationHistory.slice(0, 5); // Keep last 5
+
+            updateCalculationHistory();
+        }
+
+        function updateCalculationHistory() {
+            const $history = $('#calculationHistory');
+            const $historySection = $('#historySection');
+
+            $history.empty();
+
+            if (calculationHistory.length > 0) {
+                $historySection.show();
+                calculationHistory.forEach(entry => {
+                    $history.append(`
+                        <div class="d-flex justify-content-between small border-bottom pb-1 mb-1">
+                            <span>${entry.hours} hours</span>
+                            <span class="fw-bold">R ${entry.amount.toFixed(2)}</span>
+                            <span class="text-muted">${entry.timestamp}</span>
+                        </div>
+                    `);
+                });
+            } else {
+                $historySection.hide();
+            }
+        }
+
+
+        // Update calculateTotal function to include history
+        function calculateTotal() {
+            const hours = parseInt($('#HoursWorked').val()) || 0;
+            const hourlyRate = @(user?.HourlyRate ?? 0);
+            const totalAmount = hours * hourlyRate;
+
+            // Update displays
+            $('#HoursWorkedDisplay').text(hours);
+            $('#TotalAmountPreview').text('R ' + totalAmount.toFixed(2));
+
+            // Add to history if hours changed
+            if (hours > 0 && (calculationHistory.length === 0 || calculationHistory[0].hours !== hours)) {
+                addToHistory(hours, totalAmount);
+            }
+
+            // Show/hide calculation card
+            if (hours > 0) {
+                $('#calculationCard').show();
+            } else {
+                $('#calculationCard').hide();
+            }
+
+            // Validate hours
+            validateHoursWorked(hours);
+            updateSubmitButtonState();
+        }
+
+        // Enhanced hours validation
+        function validateHoursWorked(hours) {
+            const $feedback = $('#HoursWorkedFeedback');
+            let isValid = true;
+            let message = '';
+
+            if (hours < 1) {
+                message = '❌ Hours must be at least 1';
+                isValid = false;
+            } else if (hours > 200) {
+                message = '❌ Hours cannot exceed 200';
+                isValid = false;
+            } else if (hours > 160) {
+                message = '⚠️ High hours - ensure this is accurate';
+                isValid = true;
+            } else if (hours > 100) {
+                message = 'ℹ️ Above average hours';
+                isValid = true;
+            } else {
+                message = '✅ Valid hours entered';
+                isValid = true;
+            }
+
+            $feedback.removeClass('text-danger text-warning text-success')
+                    .addClass(isValid ? (hours > 100 ? 'text-warning' : 'text-success') : 'text-danger')
+                    .html(message);
+
+            return isValid;
+        }
+
+        // Character counter for notes
+        function updateCharacterCount() {
+            const notes = $('#Notes').val();
+            const count = notes.length;
+            $('#charCount').text(count);
+
+            if (count > 450) {
+                $('#charCount').addClass('text-warning');
+            } else {
+                $('#charCount').removeClass('text-warning');
+            }
+        }
+
+        // File preview functionality
+        function previewFiles() {
+            const files = $('#supportingDocuments')[0].files;
+            const $fileList = $('#fileList');
+            const $filePreview = $('#filePreview');
+
+            $fileList.empty();
+
+            if (files.length > 0) {
+                $filePreview.show();
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileSize = (file.size / 1024 / 1024).toFixed(2); // MB
+
+                    $fileList.append(`
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-file"></i> ${file.name}
+                                <br>
+                                <small class="text-muted">${fileSize} MB</small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile(${i})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </li>
+                    `);
                 }
-                return true;
+            } else {
+                $filePreview.hide();
+            }
+
+            validateFiles();
+        }
+
+        // Remove file from selection
+        function removeFile(index) {
+            const input = $('#supportingDocuments')[0];
+            const files = Array.from(input.files);
+            files.splice(index, 1);
+
+            // Create new FileList (simulated)
+            const dt = new DataTransfer();
+            files.forEach(file => dt.items.add(file));
+            input.files = dt.files;
+
+            previewFiles();
+        }
+
+        // Enhanced file validation with progress
+        function validateFiles() {
+            const files = $('#supportingDocuments')[0].files;
+            const allowedExtensions = ['.pdf', '.docx', '.xlsx', '.jpg', '.png', '.jpeg'];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            let isValid = true;
+            let totalSize = 0;
+
+            if (files.length > 5) {
+                showNotification('Maximum 5 files allowed', 'error');
+                isValid = false;
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const extension = '.' + file.name.split('.').pop().toLowerCase();
+                totalSize += file.size;
+
+                if (!allowedExtensions.includes(extension)) {
+                    showNotification(`Invalid file type: ${file.name}. Allowed: PDF, DOCX, XLSX, JPG, PNG`, 'error');
+                    isValid = false;
+                }
+
+                if (file.size > maxSize) {
+                    showNotification(`File too large: ${file.name} (${(file.size/1024/1024).toFixed(2)}MB)`, 'error');
+                    isValid = false;
+                }
+            }
+
+            // Show total size
+            if (files.length > 0) {
+                const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
+                $('#totalSize').text(`Total size: ${totalSizeMB} MB`);
+
+                if (totalSize > 25 * 1024 * 1024) { // 25MB total
+                    showNotification('Total file size exceeds 25MB. Please reduce file sizes.', 'warning');
+                }
+            }
+
+            return isValid;
+        }
+
+        // Quick hours setter
+        function setHours(hours) {
+            $('#HoursWorked').val(hours).trigger('input');
+        }
+
+        // Update submit button state
+        function updateSubmitButtonState() {
+            const hours = parseInt($('#HoursWorked').val()) || 0;
+            const filesValid = validateFiles();
+            const hoursValid = validateHoursWorked(hours);
+
+            $('#submitBtn').prop('disabled', !(hoursValid && filesValid && hours > 0));
+        }
+
+        // Enhanced save as draft functionality
+        function saveAsDraft() {
+            const hours = $('#HoursWorked').val();
+            const notes = $('#Notes').val();
+            const files = $('#supportingDocuments')[0].files;
+
+            // Get file names for draft
+            const fileNames = [];
+            for (let i = 0; i < files.length; i++) {
+                fileNames.push(files[i].name);
+            }
+
+            const draft = {
+                hoursWorked: hours,
+                notes: notes,
+                fileNames: fileNames,
+                savedAt: new Date().toLocaleString()
+            };
+
+            // Save to localStorage for immediate access
+            localStorage.setItem('claimDraft', JSON.stringify(draft));
+
+            // Also save to server (optional)
+            saveDraftToServer(draft);
+
+            showNotification('Draft saved successfully! You can return later to complete your claim.', 'success');
+        }
+
+         // Save draft to server
+        function saveDraftToServer(draft) {
+            $.ajax({
+                url: '@Url.Action("SaveClaimDraft", "Claims")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(draft),
+                success: function(response) {
+                    if (response.success) {
+                        console.log('Draft saved to server:', response.savedAt);
+                    }
+                },
+                error: function() {
+                    console.log('Failed to save draft to server');
+                }
+            });
+        }
+
+         // Enhanced load draft function
+        function loadDraft() {
+            const draft = localStorage.getItem('claimDraft');
+            if (draft) {
+                const data = JSON.parse(draft);
+                const timeAgo = getTimeAgo(new Date(data.savedAt));
+
+                if (confirm(`Load saved draft from ${timeAgo}?`)) {
+                    $('#HoursWorked').val(data.hoursWorked);
+                    $('#Notes').val(data.notes);
+                    calculateTotal();
+                    updateCharacterCount();
+
+                    // Show draft loaded notification
+                    showNotification('Draft loaded successfully!', 'info');
+                }
+            }
+        }
+
+        // Enhanced notification system
+        function showNotification(message, type = 'info') {
+            const alertClass = {
+                'success': 'alert-success',
+                'error': 'alert-danger',
+                'warning': 'alert-warning',
+                'info': 'alert-info'
+            }[type];
+
+            const notification = $(`
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `);
+
+            $('#notificationContainer').html(notification);
+
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                notification.alert('close');
+            }, 5000);
+        }
+
+        // Time ago utility function
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - new Date(date);
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'just now';
+            if (diffMins < 60) return `${diffMins} minutes ago`;
+            if (diffHours < 24) return `${diffHours} hours ago`;
+            return `${diffDays} days ago`;
+        }
+
+        // Enhanced form submission with progress
+        $('#claimForm').on('submit', function(e) {
+            e.preventDefault();
+
+            const hours = parseInt($('#HoursWorked').val()) || 0;
+            const filesValid = validateFiles();
+
+            let errors = [];
+
+            if (hours < 1 || hours > 200) {
+                errors.push('Please enter valid hours worked (1-200)');
+            }
+
+            if (!filesValid) {
+                errors.push('Please check your file selections');
+            }
+
+            if (errors.length > 0) {
+                $('#validationErrors').empty();
+                errors.forEach(error => {
+                    $('#validationErrors').append(`<li>${error}</li>`);
+                });
+                $('#validationSummary').show();
+                $('html, body').animate({ scrollTop: 0 }, 'slow');
+                return false;
+            }
+
+            // Show loading state
+            const $submitBtn = $('#submitBtn');
+            const originalText = $submitBtn.html();
+            $submitBtn.prop('disabled', true).html(`
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+                Submitting Claim...
+            `);
+
+            // Create FormData for file upload
+            const formData = new FormData(this);
+
+            // Submit via AJAX to show progress
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    showNotification('Claim submitted successfully!', 'success');
+
+                    // Clear draft
+                    localStorage.removeItem('claimDraft');
+
+                    // Redirect after delay
+                    setTimeout(() => {
+                        window.location.href = '/Home';
+                    }, 2000);
+                },
+                error: function(xhr) {
+                    showNotification('Error submitting claim. Please try again.', 'error');
+                    $submitBtn.prop('disabled', false).html(originalText);
+                },
+                complete: function() {
+                    // Re-enable button
+                    setTimeout(() => {
+                        $submitBtn.prop('disabled', false).html(originalText);
+                    }, 2000);
+                }
+            });
+        });
+
+        // Initialize on page load
+        $(document).ready(function() {
+            calculateTotal();
+            updateCharacterCount();
+            loadDraft();
+
+            // Validate on any input change
+            $('#HoursWorked, #Notes, #supportingDocuments').on('input change', function() {
+                updateSubmitButtonState();
             });
         });
     </script>
+
+    <style>
+        .calculation-card {
+            transition: all 0.3s ease;
+        }
+
+        .file-preview-item {
+            transition: background-color 0.2s ease;
+        }
+
+            .file-preview-item:hover {
+                background-color: #f8f9fa;
+            }
+
+        #calculationCard {
+            border-left: 4px solid #28a745;
+        }
+    </style>
 }
