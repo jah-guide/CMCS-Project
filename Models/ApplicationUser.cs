@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace ContractMonthlyClaimSystem.Models
@@ -8,7 +8,6 @@ namespace ContractMonthlyClaimSystem.Models
         [Required]
         [StringLength(100)]
         public string FirstName { get; set; } = string.Empty;
-
 
         [Required]
         [StringLength(100)]
