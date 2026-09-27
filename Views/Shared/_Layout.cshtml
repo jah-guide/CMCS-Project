@@ -1,3 +1,15 @@
+@{
+    string CmcsNavClass(string controller, string? action = null)
+    {
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+        var match = string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase)
+            && (action == null || string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase));
+        return match ? "nav-link active fw-semibold" : "nav-link";
+    }
+
+    var hrSectionActive = string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "HR", StringComparison.OrdinalIgnoreCase);
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,6 +23,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
 </head>
 <body>
+    <a class="cmcs-skip-link" href="#cmcs-main-content">Skip to main content</a>
     <header>
         <nav class="navbar navbar-expand-sm navbar-dark cmcs-navbar mb-0">
             <div class="container-fluid px-3 px-lg-4">
@@ -25,14 +38,14 @@
                 <div class="navbar-collapse collapse" id="cmcsNav">
                     <ul class="navbar-nav me-auto mb-2 mb-sm-0">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                            <a class="@CmcsNavClass("Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">
                                 <i class="fas fa-home me-1" aria-hidden="true"></i> Home
                             </a>
                         </li>
                         @if (User.IsInRole("Lecturer"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Claims" asp-action="Create">
+                                <a class="@CmcsNavClass("Claims", "Create")" asp-controller="Claims" asp-action="Create">
                                     <i class="fas fa-plus-circle me-1" aria-hidden="true"></i> New claim
                                 </a>
                             </li>
@@ -40,7 +53,7 @@
                         @if (User.IsInRole("Coordinator"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Claims" asp-action="CoordinatorDashboard">
+                                <a class="@CmcsNavClass("Claims", "CoordinatorDashboard")" asp-controller="Claims" asp-action="CoordinatorDashboard">
                                     <i class="fas fa-tasks me-1" aria-hidden="true"></i> Coordinator queue
                                 </a>
                             </li>
@@ -48,7 +61,7 @@
                         @if (User.IsInRole("Manager"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Claims" asp-action="ManagerDashboard">
+                                <a class="@CmcsNavClass("Claims", "ManagerDashboard")" asp-controller="Claims" asp-action="ManagerDashboard">
                                     <i class="fas fa-clipboard-check me-1" aria-hidden="true"></i> Manager approval
                                 </a>
                             </li>
@@ -56,7 +69,7 @@
                         @if (User.IsInRole("HR"))
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle @(hrSectionActive ? "active fw-semibold" : "")" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fas fa-building me-1" aria-hidden="true"></i> HR
                                 </a>
                                 <ul class="dropdown-menu">
@@ -79,7 +92,7 @@
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">
+                            <a class="@CmcsNavClass("Home", "Privacy")" asp-area="" asp-controller="Home" asp-action="Privacy">
                                 <i class="fas fa-shield-alt me-1" aria-hidden="true"></i> Privacy
                             </a>
                         </li>
@@ -90,7 +103,7 @@
         </nav>
     </header>
     <div class="container-fluid px-3 px-lg-4 cmcs-main">
-        <main role="main" class="pb-4">
+        <main id="cmcs-main-content" role="main" class="pb-4">
             <partial name="_FlashMessages" />
             @RenderBody()
         </main>
