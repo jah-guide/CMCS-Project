@@ -74,8 +74,15 @@
             </h5>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover cmcs-table" id="claimsTable">
+            <div class="cmcs-filter-bar mb-3" id="coordinatorPriorityFilter" role="group" aria-label="Filter queue by priority">
+                <span class="small text-muted me-1">Show:</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary active" data-filter-priority="all">All</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-filter-priority="High">High</button>
+                <button type="button" class="btn btn-sm btn-outline-warning" data-filter-priority="Medium">Medium</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter-priority="Low">Low</button>
+            </div>
+            <div class="table-responsive cmcs-table-scroll">
+                <table class="table table-striped table-hover cmcs-table cmcs-table-sticky" id="claimsTable">
                     <thead>
                         <tr>
                             <th>
@@ -108,7 +115,7 @@
                                 _ => "bg-danger"
                             };
 
-                            <tr data-priority="@item.Priority" data-score="@score.OverallScore">
+                            <tr data-priority="@score.Priority" data-score="@score.OverallScore">
                                 <td>
                                     <input type="checkbox" class="claim-checkbox" value="@claim.ClaimID"
                                            data-recommendation="@score.Recommendation" />
@@ -186,8 +193,14 @@
 }
 else
 {
-    <div class="alert alert-info">
-        <i class="fas fa-info-circle"></i> No pending claims for approval.
+    <div class="cmcs-card card">
+        <div class="card-body">
+            <partial name="_EmptyState" model='new ContractMonthlyClaimSystem.Models.EmptyStateViewModel {
+                Title = "Queue is clear",
+                Message = "There are no submitted claims waiting for coordinator review. New lecturer submissions will appear here automatically.",
+                IconClass = "fa-clipboard-check"
+            }' />
+        </div>
     </div>
 }
 
