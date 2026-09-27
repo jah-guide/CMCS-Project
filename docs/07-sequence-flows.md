@@ -1,142 +1,71 @@
 # CMCS — Sequence Flows
 
-## Flow 1 — Lecturer submits claim
+Three flows cover the happy path and rejection. All POST actions use antiforgery tokens; status changes go through `ClaimsController.UpdateStatus` unless noted.
 
-End-to-end path from form submission through persistence and initial history.
+## 1 — Lecturer submits a claim
 
 ```mermaid
 sequenceDiagram
     actor L as Lecturer
-    participant UI as Claims/Create View
     participant C as ClaimsController
-    participant UM as UserManager
-    participant DB as ApplicationDbContext
-    participant FS as FileUploadService
+    participant DB as Database
 
-    L->>UI: Enter hours, notes, files
-    UI->>C: POST Create (antiforgery token)
-    C->>UM: GetUserAsync
-    UM-->>C: ApplicationUser + HourlyRate
-    C->>C: Validate hours, compute TotalAmount
-    C->>DB: Add Claim (Status Submitted)
-    DB-->>C: ClaimID
-    loop Each valid file
-        C->>FS: IsValidFile / UploadFileAsync
-        FS-->>C: FilePath
-        C->>DB: Add SupportingDocument
-    end
-    C->>DB: Add ClaimStatusHistory (Submitted)
-    C->>DB: SaveChanges
-    C-->>L: Redirect + success message
+    L->>C: POST Create (hours, notes, files)
+    C->>C: Validate + compute total
+    C->>DB: Save Claim (Submitted)
+    C->>DB: Save documents + history
+    C-->>L: Redirect with success
 ```
 
----
-
-## Flow 2 — Coordinator reviews and approves
-
-Coordinator dashboard loads prioritised **Submitted** claims; approval updates status via AJAX.
+## 2 — Coordinator approves
 
 ```mermaid
 sequenceDiagram
     actor CO as Coordinator
-    participant UI as CoordinatorDashboard
     participant C as ClaimsController
-    participant AS as ClaimAutomationService
-    participant DB as ApplicationDbContext
+    participant DB as Database
 
-    CO->>UI: Open dashboard
-    UI->>C: GET CoordinatorDashboard
-    C->>AS: GetPrioritizedClaimsAsync
-    AS->>DB: Query StatusID = 1 + includes
-    AS-->>C: List ClaimWithScore
-    C-->>UI: Render prioritised table
-
-    CO->>UI: Approve claim (AJAX)
-    UI->>C: POST UpdateStatus(claimId, 2, notes)
-    C->>DB: Update Claim.CurrentStatusID
-    C->>DB: Insert ClaimStatusHistory
-    C->>DB: SaveChanges
-    C-->>UI: JSON success
-    UI-->>CO: Refresh row / message
+    CO->>C: GET CoordinatorDashboard
+    C->>DB: Load Submitted claims
+    CO->>C: POST UpdateStatus → ApprovedByCoordinator
+    C->>DB: Update claim + history
+    C-->>CO: JSON success (AJAX)
 ```
 
-**Optional path:** Coordinator invokes **AutoApproveClaim**; controller calls `ProcessAutomatedApprovalAsync` and only advances status when automation rules pass.
+Optional: **AutoApproveClaim** runs automation rules before advancing status.
 
----
-
-## Flow 3 — Manager final approval
-
-Manager works on claims already in **ApprovedByCoordinator** status.
+## 3 — Manager final approval
 
 ```mermaid
 sequenceDiagram
-    actor M as Academic Manager
-    participant UI as ManagerDashboard
+    actor M as Manager
     participant C as ClaimsController
-    participant AS as ClaimAutomationService
-    participant DB as ApplicationDbContext
+    participant DB as Database
 
-    M->>UI: Open manager dashboard
-    UI->>C: GET ManagerDashboard
-    C->>DB: Query CurrentStatusID = 2
-    C-->>UI: Approved-by-coordinator list
-
-    M->>UI: View analysis (optional)
-    UI->>C: GET GetManagerAnalysis(claimId)
-    C->>AS: CalculateClaimScoreAsync
-    AS-->>C: ClaimScore + HTML fragment
-    C-->>UI: Analysis panel
-
-    M->>UI: Final approve (AJAX)
-    UI->>C: POST UpdateStatus(claimId, 3, notes)
-    C->>DB: Update status + history
-    C-->>UI: JSON success
-
-    opt Batch high confidence
-        M->>UI: BatchApproveHighConfidence
-        UI->>C: POST BatchApproveHighConfidence
-        C->>AS: Score each claim
-        C->>DB: Bulk update to ApprovedByManager
-    end
+    M->>C: GET ManagerDashboard
+    C->>DB: Load ApprovedByCoordinator claims
+    M->>C: POST UpdateStatus → ApprovedByManager
+    C->>DB: Update claim + history
+    C-->>M: JSON success
 ```
 
----
+Batch **BatchApproveHighConfidence** may approve multiple high-scoring claims in one request.
 
-## Flow 4 — Rejection (coordinator or manager)
+## Rejection (coordinator or manager)
 
-Same `UpdateStatus` endpoint with `newStatusId = 4` (Rejected). Notes should capture reason for lecturer visibility on **Details**.
+Same endpoint with status **Rejected (4)** and notes stored on history for the lecturer to read on **Details**.
 
-```mermaid
-sequenceDiagram
-    actor R as Reviewer
-    participant UI as Dashboard
-    participant C as ClaimsController
-    participant DB as ApplicationDbContext
+## Who can do what
 
-    R->>UI: Reject with reason
-    UI->>C: POST UpdateStatus(claimId, 4, notes)
-    C->>DB: CurrentStatusID = Rejected
-    C->>DB: Add history row
-    C-->>UI: success
-```
-
----
-
-## Authorization checkpoints
-
-| Step | Required role |
-|------|----------------|
+| Action | Role |
+|--------|------|
 | Create claim | Lecturer |
-| CoordinatorDashboard | Coordinator |
-| ManagerDashboard | Manager |
+| Coordinator dashboard | Coordinator |
+| Manager dashboard | Manager |
 | UpdateStatus | Coordinator or Manager |
-| BatchApproveHighConfidence | Manager |
 
----
+## Resilience
 
-## Error handling notes
+If automation fails when loading the coordinator dashboard, the controller falls back to a plain pending list (see NFR-09 in requirements).
 
-- If automation fails on coordinator dashboard load, controller falls back to a plain pending list (NFR-09).
-- Invalid files are skipped during upload loop; lecturer may receive success with partial attachments unless all files invalid.
-
-See [09-acceptance-tests.md](./09-acceptance-tests.md) for executable test mapping.
+Test mapping: [08-traceability-matrix.md](./08-traceability-matrix.md).
