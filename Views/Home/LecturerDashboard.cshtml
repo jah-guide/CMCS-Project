@@ -1,126 +1,246 @@
-@model IEnumerable<ContractMonthlyClaimSystem.Models.Claim>
-@using ContractMonthlyClaimSystem.Models
-
-@{
-    ViewData["Title"] = "Lecturer dashboard";
-    var user = ViewBag.User as ApplicationUser;
-    var claims = Model.ToList();
-    var pendingCount = claims.Count(c => c.CurrentStatus?.StatusName is "Submitted" or "ApprovedByCoordinator" or "ApprovedByManager");
-    var paidTotal = claims.Where(c => c.CurrentStatus?.StatusName == "Paid").Sum(c => c.TotalAmount);
-    var statusCounts = claims
-        .GroupBy(c => c.CurrentStatus?.StatusName ?? "Unknown")
-        .ToDictionary(g => g.Key, g => g.Count());
-}
-
-<div class="cmcs-page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
-    <div>
-        <h2>Welcome, @user.FullName</h2>
-        <p class="cmcs-lead">Track submitted claims and start a new monthly submission when you are ready.</p>
-    </div>
-    <a asp-action="Create" asp-controller="Claims" class="btn btn-cmcs-primary btn-lg align-self-center">
-        <i class="fas fa-plus me-1" aria-hidden="true"></i> Submit new claim
-    </a>
-</div>
-
-<div class="row g-3 mb-4">
-    <div class="col-sm-6 col-lg-3">
-        <div class="cmcs-stat cmcs-stat--primary p-3 h-100">
-            <div class="cmcs-stat-label">Hourly rate</div>
-            <div class="cmcs-stat-value">R @user.HourlyRate.ToString("F2")</div>
-            <p class="cmcs-stat-meta mb-0">Used to calculate claim totals</p>
-        </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="cmcs-stat cmcs-stat--info p-3 h-100">
-            <div class="cmcs-stat-label">Claims on file</div>
-            <div class="cmcs-stat-value">@claims.Count</div>
-            <p class="cmcs-stat-meta mb-0">Including all statuses</p>
-        </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="cmcs-stat cmcs-stat--warning p-3 h-100">
-            <div class="cmcs-stat-label">In progress</div>
-            <div class="cmcs-stat-value">@pendingCount</div>
-            <p class="cmcs-stat-meta mb-0">Awaiting approval or payment</p>
-        </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="cmcs-stat cmcs-stat--success p-3 h-100">
-            <div class="cmcs-stat-label">Paid to date</div>
-            <div class="cmcs-stat-value" style="font-size:1.35rem;">R @paidTotal.ToString("F2")</div>
-            <p class="cmcs-stat-meta mb-0">@statusCounts.GetValueOrDefault("Paid") paid claim(s)</p>
-        </div>
-    </div>
-</div>
-
-<div class="cmcs-card card">
-    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <span><i class="fas fa-history me-2" aria-hidden="true"></i>My claims</span>
-        @if (claims.Any())
-        {
-            <span class="small text-muted">Filter by status</span>
-        }
-    </div>
-    <div class="card-body">
-        @if (claims.Any())
-        {
-            <div class="cmcs-filter-bar" id="claimStatusFilter" role="group" aria-label="Filter claims by status">
-                <button type="button" class="btn btn-sm btn-outline-secondary active" data-filter-status="all" aria-pressed="true">All (@claims.Count)</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter-status="Submitted" aria-pressed="false">Submitted (@statusCounts.GetValueOrDefault("Submitted"))</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter-status="ApprovedByCoordinator" aria-pressed="false">Coordinator (@statusCounts.GetValueOrDefault("ApprovedByCoordinator"))</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter-status="ApprovedByManager" aria-pressed="false">Manager (@statusCounts.GetValueOrDefault("ApprovedByManager"))</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter-status="Rejected" aria-pressed="false">Rejected (@statusCounts.GetValueOrDefault("Rejected"))</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter-status="Paid" aria-pressed="false">Paid (@statusCounts.GetValueOrDefault("Paid"))</button>
-            </div>
-            <div class="table-responsive cmcs-table-scroll">
-                <table class="table table-striped cmcs-table cmcs-table-sticky align-middle mb-0" id="lecturerClaimsTable">
-                    <thead>
-                        <tr>
-                            <th>Claim ID</th>
-                            <th>Submitted</th>
-                            <th>Hours</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var claim in claims)
-                        {
-                            <tr data-claim-status="@claim.CurrentStatus?.StatusName">
-                                <td><span class="fw-semibold">#@claim.ClaimID</span></td>
-                                <td>@claim.SubmissionDate.ToString("yyyy-MM-dd")</td>
-                                <td>@claim.HoursWorked</td>
-                                <td>R @claim.TotalAmount.ToString("F2")</td>
-                                <td>
-                                    <partial name="_ClaimStatusBadge" model="@claim.CurrentStatus.StatusName" />
-                                </td>
-                                <td class="text-end">
-                                    <a asp-action="Details" asp-controller="Claims" asp-route-id="@claim.ClaimID"
-                                       class="btn btn-sm btn-outline-secondary">View details</a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <div id="claimFilterEmpty" class="d-none mt-3">
-                <partial name="_EmptyState" model='new EmptyStateViewModel {
-                    Title = "No claims match this filter",
-                    Message = "Try another status or reset to All to see your full history.",
-                    IconClass = "fa-filter"
-                }' />
-            </div>
-        }
-        else
-        {
-            <partial name="_EmptyState" model='new EmptyStateViewModel {
-                Title = "No claims yet",
-                Message = "When your monthly hours are ready, submit your first claim using the button above.",
-                IconClass = "fa-file-invoice",
-                ActionUrl = Url.Action("Create", "Claims")!,
-                ActionText = "Submit new claim"
-            }' />
-        }
-    </div>
-</div>
+@model IEnumerable<ContractMonthlyClaimSystem.Models.Claim>
+
+@using ContractMonthlyClaimSystem.Models
+
+
+
+@{
+
+    ViewData["Title"] = "Lecturer dashboard";
+
+    var user = ViewBag.User as ApplicationUser;
+
+    var claims = Model.ToList();
+
+    var pendingCount = claims.Count(c => c.CurrentStatus?.StatusName is "Submitted" or "ApprovedByCoordinator" or "ApprovedByManager");
+
+    var paidTotal = claims.Where(c => c.CurrentStatus?.StatusName == "Paid").Sum(c => c.TotalAmount);
+
+    var statusCounts = claims
+
+        .GroupBy(c => c.CurrentStatus?.StatusName ?? "Unknown")
+
+        .ToDictionary(g => g.Key, g => g.Count());
+
+}
+
+
+
+<div class="cmcs-page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+
+    <div>
+
+        <h2>Welcome, @user.FullName</h2>
+
+        <p class="cmcs-lead">Track submitted claims and start a new monthly submission when you are ready.</p>
+
+    </div>
+
+    <a asp-action="Create" asp-controller="Claims" class="btn btn-cmcs-primary btn-lg align-self-center">
+
+        <i class="fas fa-plus me-1" aria-hidden="true"></i> Submit new claim
+
+    </a>
+
+</div>
+
+
+
+<div class="row g-3 mb-4">
+
+    <div class="col-sm-6 col-lg-3">
+
+        <div class="cmcs-stat cmcs-stat--primary p-3 h-100">
+
+            <div class="cmcs-stat-label">Hourly rate</div>
+
+            <div class="cmcs-stat-value">R @user.HourlyRate.ToString("F2")</div>
+
+            <p class="cmcs-stat-meta mb-0">Used to calculate claim totals</p>
+
+        </div>
+
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+
+        <div class="cmcs-stat cmcs-stat--info p-3 h-100">
+
+            <div class="cmcs-stat-label">Claims on file</div>
+
+            <div class="cmcs-stat-value">@claims.Count</div>
+
+            <p class="cmcs-stat-meta mb-0">Including all statuses</p>
+
+        </div>
+
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+
+        <div class="cmcs-stat cmcs-stat--warning p-3 h-100">
+
+            <div class="cmcs-stat-label">In progress</div>
+
+            <div class="cmcs-stat-value">@pendingCount</div>
+
+            <p class="cmcs-stat-meta mb-0">Awaiting approval or payment</p>
+
+        </div>
+
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+
+        <div class="cmcs-stat cmcs-stat--success p-3 h-100">
+
+            <div class="cmcs-stat-label">Paid to date</div>
+
+            <div class="cmcs-stat-value" style="font-size:1.35rem;">R @paidTotal.ToString("F2")</div>
+
+            <p class="cmcs-stat-meta mb-0">@statusCounts.GetValueOrDefault("Paid") paid claim(s)</p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<div class="cmcs-card card">
+
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+
+        <span><i class="fas fa-history me-2" aria-hidden="true"></i>My claims</span>
+
+        @if (claims.Any())
+
+        {
+
+            <span class="small text-muted">Filter by status</span>
+
+        }
+
+    </div>
+
+    <div class="card-body">
+
+        @if (claims.Any())
+
+        {
+
+            <div class="cmcs-filter-bar" id="claimStatusFilter" role="group" aria-label="Filter claims by status">
+
+                <button type="button" class="btn btn-sm btn-outline-secondary active" data-filter-status="all" aria-pressed="true">All (@claims.Count)</button>
+
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter-status="Submitted" aria-pressed="false">Submitted (@statusCounts.GetValueOrDefault("Submitted"))</button>
+
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter-status="ApprovedByCoordinator" aria-pressed="false">Coordinator (@statusCounts.GetValueOrDefault("ApprovedByCoordinator"))</button>
+
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter-status="ApprovedByManager" aria-pressed="false">Manager (@statusCounts.GetValueOrDefault("ApprovedByManager"))</button>
+
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter-status="Rejected" aria-pressed="false">Rejected (@statusCounts.GetValueOrDefault("Rejected"))</button>
+
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-filter-status="Paid" aria-pressed="false">Paid (@statusCounts.GetValueOrDefault("Paid"))</button>
+
+            </div>
+
+            <div class="table-responsive cmcs-table-scroll">
+
+                <table class="table table-striped cmcs-table cmcs-table-sticky align-middle mb-0" id="lecturerClaimsTable">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Claim ID</th>
+
+                            <th>Submitted</th>
+
+                            <th>Hours</th>
+
+                            <th>Total</th>
+
+                            <th>Status</th>
+
+                            <th></th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var claim in claims)
+
+                        {
+
+                            <tr data-claim-status="@claim.CurrentStatus?.StatusName">
+
+                                <td><span class="fw-semibold">#@claim.ClaimID</span></td>
+
+                                <td>@claim.SubmissionDate.ToString("yyyy-MM-dd")</td>
+
+                                <td>@claim.HoursWorked</td>
+
+                                <td>R @claim.TotalAmount.ToString("F2")</td>
+
+                                <td>
+
+                                    <partial name="_ClaimStatusBadge" model="@claim.CurrentStatus.StatusName" />
+
+                                </td>
+
+                                <td class="text-end">
+
+                                    <a asp-action="Details" asp-controller="Claims" asp-route-id="@claim.ClaimID"
+
+                                       class="btn btn-sm btn-outline-secondary">View details</a>
+
+                                </td>
+
+                            </tr>
+
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div id="claimFilterEmpty" class="d-none mt-3">
+                <partial name="_EmptyState" model='new EmptyStateViewModel {
+                    Title = "No claims match this filter",
+                    Message = "Try another status or reset to All to see your full history.",
+                    IconClass = "fa-filter"
+                }' />
+            </div>
+            <partial name="_ClaimStatusLegend" />
+        }
+
+        else
+
+        {
+
+            <partial name="_EmptyState" model='new EmptyStateViewModel {
+
+                Title = "No claims yet",
+
+                Message = "When your monthly hours are ready, submit your first claim using the button above.",
+
+                IconClass = "fa-file-invoice",
+
+                ActionUrl = Url.Action("Create", "Claims")!,
+
+                ActionText = "Submit new claim"
+
+            }' />
+
+        }
+
+    </div>
+
+</div>
+

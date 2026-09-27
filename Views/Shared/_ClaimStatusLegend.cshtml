@@ -1,0 +1,8 @@
+<div class="cmcs-status-legend" aria-label="Claim status legend">
+    <span class="small text-muted me-2">Status key:</span>
+    <partial name="_ClaimStatusBadge" model="@("Submitted")" />
+    <partial name="_ClaimStatusBadge" model="@("ApprovedByCoordinator")" />
+    <partial name="_ClaimStatusBadge" model="@("ApprovedByManager")" />
+    <partial name="_ClaimStatusBadge" model="@("Rejected")" />
+    <partial name="_ClaimStatusBadge" model="@("Paid")" />
+</div>
