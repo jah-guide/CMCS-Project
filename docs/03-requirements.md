@@ -50,6 +50,7 @@
 | NFR-05 | Data integrity | Foreign keys restrict orphan claims; user delete restricted on claims. | EF `DeleteBehavior.Restrict` |
 | NFR-06 | Data integrity | Monetary fields use decimal(18,2) precision. | EF configuration |
 | NFR-07 | Usability | Bootstrap-based responsive UI for dashboards and forms. | Bootstrap 5 |
+| NFR-07a | Usability | Shared status badges, flash messages, empty states, and client-side claim list filters on lecturer/coordinator dashboards. | See [10-ui-ux-features.md](./10-ui-ux-features.md) |
 | NFR-08 | Performance | Coordinator dashboard shall load pending claims in a single query with includes. | EF `Include` patterns |
 | NFR-09 | Reliability | Coordinator dashboard falls back to basic list if automation service fails. | Implemented fallback |
 | NFR-10 | Maintainability | Business logic for uploads and automation isolated in service classes. | `IFileUploadService`, `IClaimAutomationService` |

@@ -13,6 +13,7 @@ Systems Analyst deliverables for the Contract Monthly Claim System. Read in orde
 | 07 | [sequence flows](./07-sequence-flows.md) | Submit and approval paths |
 | 08 | [traceability](./08-traceability-matrix.md) | Requirements → tests |
 | 09 | [acceptance tests](./09-acceptance-tests.md) | Manual and automated checks |
+| 10 | [UI/UX features](./10-ui-ux-features.md) | Shared partials, filters, empty states |
 | — | [seed accounts](./seed-accounts.md) | **Local demo only** — test logins |
 
 Implementation lives in the ASP.NET Core MVC project at the repository root; this folder is the traceable analysis layer for portfolio review.
