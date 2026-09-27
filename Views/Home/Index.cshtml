@@ -22,7 +22,58 @@
     }
     else
     {
-        <p class="text-muted mt-3 mb-0">Use the navigation above to open your dashboard or submit a claim.</p>
+        <div class="row g-3 mt-4 text-start mx-auto" style="max-width: 720px;">
+            <div class="col-12">
+                <p class="text-muted mb-2 text-center">Quick links for your role</p>
+            </div>
+            @if (User.IsInRole("Lecturer"))
+            {
+                <div class="col-sm-6">
+                    <a class="cmcs-card card h-100 text-decoration-none text-body p-3" asp-controller="Claims" asp-action="Create">
+                        <i class="fas fa-plus-circle text-primary mb-2" aria-hidden="true"></i>
+                        <strong>Submit new claim</strong>
+                        <p class="small text-muted mb-0">Hours, notes, and documents for this month.</p>
+                    </a>
+                </div>
+            }
+            @if (User.IsInRole("Coordinator"))
+            {
+                <div class="col-sm-6">
+                    <a class="cmcs-card card h-100 text-decoration-none text-body p-3" asp-controller="Claims" asp-action="CoordinatorDashboard">
+                        <i class="fas fa-tasks text-primary mb-2" aria-hidden="true"></i>
+                        <strong>Coordinator queue</strong>
+                        <p class="small text-muted mb-0">Review and approve submitted claims.</p>
+                    </a>
+                </div>
+            }
+            @if (User.IsInRole("Manager"))
+            {
+                <div class="col-sm-6">
+                    <a class="cmcs-card card h-100 text-decoration-none text-body p-3" asp-controller="Claims" asp-action="ManagerDashboard">
+                        <i class="fas fa-clipboard-check text-primary mb-2" aria-hidden="true"></i>
+                        <strong>Manager approval</strong>
+                        <p class="small text-muted mb-0">Final sign-off on coordinator-approved claims.</p>
+                    </a>
+                </div>
+            }
+            @if (User.IsInRole("HR"))
+            {
+                <div class="col-sm-6">
+                    <a class="cmcs-card card h-100 text-decoration-none text-body p-3" asp-controller="HR" asp-action="Dashboard">
+                        <i class="fas fa-chart-line text-primary mb-2" aria-hidden="true"></i>
+                        <strong>HR dashboard</strong>
+                        <p class="small text-muted mb-0">Payments, lecturers, and reporting.</p>
+                    </a>
+                </div>
+            }
+            <div class="col-sm-6">
+                <a class="cmcs-card card h-100 text-decoration-none text-body p-3" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-home text-primary mb-2" aria-hidden="true"></i>
+                    <strong>Your dashboard</strong>
+                    <p class="small text-muted mb-0">Return to your role home view after sign-in.</p>
+                </a>
+            </div>
+        </div>
     }
 
     <ul class="cmcs-feature-list list-unstyled">
