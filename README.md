@@ -1,52 +1,128 @@
 # Contract Monthly Claim System (CMCS)
 
-## PROG6212 Programming 2B - Part 2 Submission
+**Systems Analyst case study · ASP.NET Core reference implementation**
 
-A comprehensive ASP.NET Core MVC web application for managing monthly claims submission and approval workflow for independent contractor lecturers.
+CMCS replaces a fragile **paper-and-email** monthly claim process for **independent contractor lecturers** with a structured web workflow: submit hours and evidence, coordinator review, academic manager sign-off, and a durable audit trail.
 
-### Features Implemented
+> **Start with the analysis pack:** full business analysis artefacts live in **[`docs/`](./docs/)** — context, requirements, use cases, process models, data design, sequence flows, traceability, and acceptance tests.
 
-✅ **One-Click Claim Submission** - Simple, intuitive form for lecturers  
-✅ **Role-Based Approval Workflow** - Coordinator and Manager dashboards  
-✅ **Document Upload System** - Secure file storage with validation  
-✅ **Real-Time Status Tracking** - Transparent claim progression  
-✅ **Unit Testing** - Comprehensive test coverage  
-✅ **Version Control** - Proper Git workflow with descriptive commits  
+---
 
-### Technology Stack
+## The problem
 
-- **Backend**: ASP.NET Core 6.0 MVC
-- **Database**: Entity Framework Core with SQL Server
-- **Authentication**: ASP.NET Core Identity
-- **Frontend**: Bootstrap 5, jQuery, AJAX
-- **Testing**: xUnit, InMemory Database
-- **Version Control**: Git & GitHub
+Lecturers historically emailed spreadsheets and scanned attachments to coordinators, who forwarded threads to academic managers. Payment teams reconstructed totals manually. The result was slow cycle times, lost files, and weak proof of approval.
 
-### User Roles & Credentials
+## Stakeholders & outcomes
 
-- **Lecturer**: Self-registration through application
-- **Coordinator**: `coordinator@cmcs.com` / `Coordinator123!`
-- **Academic Manager**: `manager@cmcs.com` / `Manager123!`
+| Stakeholder | Outcome enabled by CMCS |
+|-------------|-------------------------|
+| Lecturer | One place to submit hours, upload documents, and track status |
+| Programme coordinator | Prioritised queue of **Submitted** claims with approve/reject and notes |
+| Academic manager | Queue of coordinator-approved claims and summary reporting |
+| Compliance / audit | `ClaimStatusHistory` records who changed status and when |
 
-### Project Structure
+Role mapping in the app: **Lecturer**, **Coordinator**, **Manager** (Academic Manager).
+
+---
+
+## Documentation index
+
+| Document | Contents |
+|----------|----------|
+| [docs/01-context.md](./docs/01-context.md) | Business context, scope, success measures |
+| [docs/02-stakeholders-raci.md](./docs/02-stakeholders-raci.md) | Stakeholders, personas, RACI |
+| [docs/03-requirements.md](./docs/03-requirements.md) | FR-01…FR-26, NFRs, business rules |
+| [docs/04-use-cases-stories.md](./docs/04-use-cases-stories.md) | Use cases and acceptance criteria |
+| [docs/05-process-as-is-to-be.md](./docs/05-process-as-is-to-be.md) | As-is vs to-be (Mermaid) |
+| [docs/06-data-model.md](./docs/06-data-model.md) | ERD: Claim, Document, User, Status |
+| [docs/07-sequence-flows.md](./docs/07-sequence-flows.md) | Submit → coordinator → manager |
+| [docs/08-traceability-matrix.md](./docs/08-traceability-matrix.md) | Requirements → tests |
+| [docs/09-acceptance-tests.md](./docs/09-acceptance-tests.md) | Manual & automated acceptance |
+| [docs/seed-accounts.md](./docs/seed-accounts.md) | **Local demo only** — seed credentials |
+
+---
+
+## Technology stack
+
+| Layer | Choice |
+|-------|--------|
+| Application | ASP.NET Core **6** MVC |
+| Data | Entity Framework Core, SQL Server (LocalDB in dev) |
+| Security | ASP.NET Core Identity, role-based authorization |
+| UI | Bootstrap 5, jQuery, AJAX approval actions |
+| Testing | xUnit, EF Core InMemory provider |
+| Services | File upload validation, claim automation/scoring, reporting |
+
+---
+
+## Solution layout
+
+```
 CMCS-Project/
-├── Controllers/ # MVC Controllers
-├── Models/ # Data Models & View Models
-├── Views/ # Razor Views
-├── Data/ # DbContext & Migrations
-├── Services/ # Business Logic Services
-├── Areas/ # Identity Pages
-└── ContractMonthlyClaimSystem.Tests/ # Unit Tests
+├── Controllers/          # Claims workflow, Home
+├── Models/               # Claim, Status, documents, view models
+├── Views/                # Lecturer & approval dashboards
+├── Data/                 # ApplicationDbContext, SeedData
+├── Services/             # Upload, automation, reports
+├── Areas/                # Identity UI
+├── ClaimServiceTests.cs  # Unit tests (xUnit)
+└── docs/                 # Systems Analyst deliverables
+```
 
+---
 
-### Setup Instructions
+## Run locally
 
-1. Clone repository
-2. Restore NuGet packages
-3. Update database: `Update-Database`
-4. Run application
-5. Use provided credentials for testing
+**Prerequisites:** [.NET 6 SDK](https://dotnet.microsoft.com/download/dotnet/6.0), SQL Server LocalDB (typical Visual Studio install).
 
-### Commit History
+1. **Clone** the repository and open a terminal in the project root.
 
-The project demonstrates proper version control with descriptive commits showing the development progression.
+2. **Configure database** (default LocalDB connection in `appsettings.json`):
+
+   ```json
+   "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=CMCS_Database;Trusted_Connection=true;MultipleActiveResultSets=true"
+   ```
+
+3. **Restore and run:**
+
+   ```bash
+   dotnet restore ContractMonthlyClaimSystem.sln
+   dotnet run --project ContractMonthlyClaimSystem.csproj
+   ```
+
+   On first run, migrations and **seed data** apply automatically (`SeedData.Initialize`).
+
+4. **Optional — EF CLI** (if you add migrations in development):
+
+   ```bash
+   dotnet ef database update
+   ```
+
+5. Open the HTTPS URL shown in the console (trust the dev certificate if prompted).
+
+6. **Test accounts:** use [docs/seed-accounts.md](./docs/seed-accounts.md) for coordinator/manager demo logins. Register a **Lecturer** via the app to test submission.
+
+7. **Unit tests:**
+
+   ```bash
+   dotnet test ContractMonthlyClaimSystem.sln
+   ```
+
+---
+
+## Features (implementation snapshot)
+
+- Lecturer claim submission with automatic amount calculation  
+- Supporting document upload (type/size validated)  
+- Coordinator dashboard with prioritisation and batch/auto-approval aids  
+- Academic manager dashboard, analysis views, and report generation  
+- Status history on every transition  
+- Unit tests for core domain calculations and persistence  
+
+---
+
+## Portfolio note
+
+This repository is curated as a **Systems Analyst showcase** for [jah-guide](https://github.com/jah-guide): analysis-first documentation under `docs/`, with this codebase as the traceable solution increment (PROG6212 Programming 2B — Contract Monthly Claim System).
+
+**License:** see [LICENSE](./LICENSE).
