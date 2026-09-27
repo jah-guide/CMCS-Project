@@ -195,3 +195,74 @@ body {
 .bg-orange {
   background-color: #ea580c !important;
 }
+
+/* Flash / toast-style alerts */
+.cmcs-flash {
+  border: 1px solid var(--cmcs-border);
+  box-shadow: var(--cmcs-shadow);
+  border-left-width: 4px;
+}
+
+.alert-success.cmcs-flash { border-left-color: var(--cmcs-success); }
+.alert-danger.cmcs-flash { border-left-color: var(--cmcs-danger); }
+.alert-info.cmcs-flash { border-left-color: var(--cmcs-info); }
+
+/* Empty states */
+.cmcs-empty-state {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.cmcs-empty-state-icon {
+  font-size: 2.5rem;
+  color: var(--cmcs-slate);
+  opacity: 0.85;
+}
+
+.cmcs-empty-state-message {
+  max-width: 360px;
+}
+
+/* Claim list filters */
+.cmcs-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.cmcs-filter-bar .btn.active {
+  background-color: var(--cmcs-navy);
+  border-color: var(--cmcs-navy);
+  color: #fff;
+}
+
+/* Responsive tables */
+.cmcs-table-scroll {
+  position: relative;
+}
+
+@media (max-width: 767.98px) {
+  .cmcs-table-scroll::after {
+    content: "Scroll for more columns →";
+    display: block;
+    font-size: 0.75rem;
+    color: var(--cmcs-slate);
+    text-align: right;
+    padding-top: 0.35rem;
+  }
+
+  .table.cmcs-table thead th {
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 768px) {
+  .cmcs-table-sticky thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    box-shadow: 0 1px 0 var(--cmcs-border);
+  }
+}
