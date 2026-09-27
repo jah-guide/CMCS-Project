@@ -3,83 +3,97 @@
 
 @if (ViewBag.Success != null)
 {
-    <div class="alert alert-success">@ViewBag.Success</div>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @ViewBag.Success
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 
 @if (ViewBag.Error != null)
 {
-    <div class="alert alert-danger">@ViewBag.Error</div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @ViewBag.Error
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 
 @{
-    ViewData["Title"] = "Lecturer Dashboard";
+    ViewData["Title"] = "Lecturer dashboard";
     var user = ViewBag.User as ApplicationUser;
 }
 
-<h2>Welcome, @user.FullName</h2>
+<div class="cmcs-page-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+        <h2>Welcome, @user.FullName</h2>
+        <p class="cmcs-lead">Track submitted claims and start a new monthly submission when you are ready.</p>
+    </div>
+    <a asp-action="Create" asp-controller="Claims" class="btn btn-cmcs-primary btn-lg align-self-center">
+        <i class="fas fa-plus me-1" aria-hidden="true"></i> Submit new claim
+    </a>
+</div>
 
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary">
-            <div class="card-body">
-                <h5 class="card-title">Hourly Rate</h5>
-                <p class="card-text h4">R @user.HourlyRate.ToString("F2")</p>
-            </div>
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="cmcs-stat cmcs-stat--primary p-3 h-100">
+            <div class="cmcs-stat-label">Hourly rate</div>
+            <div class="cmcs-stat-value">R @user.HourlyRate.ToString("F2")</div>
+            <p class="cmcs-stat-meta mb-0">Used to calculate claim totals</p>
         </div>
     </div>
-    <div class="col-md-9">
-        <a asp-action="Create" asp-controller="Claims" class="btn btn-success btn-lg">
-            <i class="fas fa-plus"></i> Submit New Claim
-        </a>
+    <div class="col-sm-6 col-lg-3">
+        <div class="cmcs-stat cmcs-stat--info p-3 h-100">
+            <div class="cmcs-stat-label">Claims on file</div>
+            <div class="cmcs-stat-value">@Model.Count()</div>
+            <p class="cmcs-stat-meta mb-0">Including all statuses</p>
+        </div>
     </div>
 </div>
 
-<h4>My Claims History</h4>
-
-@if (Model.Any())
-{
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Claim ID</th>
-                    <th>Submission Date</th>
-                    <th>Hours Worked</th>
-                    <th>Total Amount</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var claim in Model)
-                {
-                    <tr>
-                        <td>@claim.ClaimID</td>
-                        <td>@claim.SubmissionDate.ToString("yyyy-MM-dd")</td>
-                        <td>@claim.HoursWorked</td>
-                        <td>R @claim.TotalAmount.ToString("F2")</td>
-                        <td>
-                            <span class="badge
-                                        @(claim.CurrentStatus.StatusName == "Submitted" ? "bg-warning" :
-                                                                    claim.CurrentStatus.StatusName == "ApprovedByCoordinator" ? "bg-info" :
-                                                                    claim.CurrentStatus.StatusName == "ApprovedByManager" ? "bg-success" :
-                                                                    claim.CurrentStatus.StatusName == "Rejected" ? "bg-danger" : "bg-secondary")">
-                        @claim.CurrentStatus.StatusName
-                    </span>
-                </td>
-                <td>
-                    <a asp-action="Details" asp-controller="Claims" asp-route-id="@claim.ClaimID"
-                       class="btn btn-sm btn-outline-primary">View Details</a>
-                </td>
-            </tr>
+<div class="cmcs-card card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-history me-2" aria-hidden="true"></i>My claims</span>
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped cmcs-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Claim ID</th>
+                            <th>Submitted</th>
+                            <th>Hours</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var claim in Model)
+                        {
+                            <tr>
+                                <td><span class="fw-semibold">#@claim.ClaimID</span></td>
+                                <td>@claim.SubmissionDate.ToString("yyyy-MM-dd")</td>
+                                <td>@claim.HoursWorked</td>
+                                <td>R @claim.TotalAmount.ToString("F2")</td>
+                                <td>
+                                    <partial name="_ClaimStatusBadge" model="@claim.CurrentStatus.StatusName" />
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="Details" asp-controller="Claims" asp-route-id="@claim.ClaimID"
+                                       class="btn btn-sm btn-outline-secondary">View details</a>
+                                </td>
+                            </tr>
                         }
-            </tbody>
-        </table>
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-0">
+                You have not submitted any claims yet. Use <strong>Submit new claim</strong> when your monthly hours are ready.
+            </div>
+        }
     </div>
-}
-else
-{
-    <div class="alert alert-info">
-        <p>You haven't submitted any claims yet.</p>
-    </div>
-}
+</div>

@@ -1,0 +1,20 @@
+@model string
+@{
+    var name = Model ?? "";
+    var css = name switch
+    {
+        "Submitted" => "cmcs-badge-submitted",
+        "ApprovedByCoordinator" => "cmcs-badge-coordinator",
+        "ApprovedByManager" => "cmcs-badge-manager",
+        "Rejected" => "cmcs-badge-rejected",
+        "Paid" => "cmcs-badge-paid",
+        _ => "bg-secondary"
+    };
+    var label = name switch
+    {
+        "ApprovedByCoordinator" => "Coordinator approved",
+        "ApprovedByManager" => "Manager approved",
+        _ => name
+    };
+}
+<span class="badge cmcs-badge @css">@label</span>
