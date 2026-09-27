@@ -1,95 +1,116 @@
-<!-- File: Views/Shared/_Layout.cshtml - ADD HR NAVIGATION -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ContractMonthlyClaimSystem</title>
+    <title>@ViewData["Title"] - CMCS</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ContractMonthlyClaimSystem.styles.css" asp-append-version="true" />
-    <!-- Add Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Add DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
+        <nav class="navbar navbar-expand-sm navbar-dark cmcs-navbar mb-0">
+            <div class="container-fluid px-3 px-lg-4">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-file-invoice-dollar"></i> ContractMonthlyClaimSystem
+                    <i class="fas fa-file-invoice-dollar me-1" aria-hidden="true"></i>
+                    <span>Contract Monthly Claim System</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#cmcsNav"
+                        aria-controls="cmcsNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse" id="cmcsNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-sm-0">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-home"></i> Home
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home me-1" aria-hidden="true"></i> Home
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">
-                                <i class="fas fa-shield-alt"></i> Privacy
-                            </a>
-                        </li>
-                        <!-- ADD HR NAVIGATION -->
+                        @if (User.IsInRole("Lecturer"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Claims" asp-action="Create">
+                                    <i class="fas fa-plus-circle me-1" aria-hidden="true"></i> New claim
+                                </a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Coordinator"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Claims" asp-action="CoordinatorDashboard">
+                                    <i class="fas fa-tasks me-1" aria-hidden="true"></i> Coordinator queue
+                                </a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Manager"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Claims" asp-action="ManagerDashboard">
+                                    <i class="fas fa-clipboard-check me-1" aria-hidden="true"></i> Manager approval
+                                </a>
+                            </li>
+                        }
                         @if (User.IsInRole("HR"))
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-tachometer-alt"></i> HR Dashboard
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-building me-1" aria-hidden="true"></i> HR
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
                                         <a class="dropdown-item" asp-controller="HR" asp-action="Dashboard">
-                                            <i class="fas fa-home"></i> Dashboard
+                                            <i class="fas fa-chart-line me-2" aria-hidden="true"></i> Dashboard
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="HR" asp-action="LecturerManagement">
-                                            <i class="fas fa-users-cog"></i> Lecturer Management
+                                            <i class="fas fa-users me-2" aria-hidden="true"></i> Lecturer management
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="HR" asp-action="Reports">
-                                            <i class="fas fa-chart-line"></i> Reports & Analytics
+                                            <i class="fas fa-file-alt me-2" aria-hidden="true"></i> Reports
                                         </a>
                                     </li>
                                 </ul>
                             </li>
                         }
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">
+                                <i class="fas fa-shield-alt me-1" aria-hidden="true"></i> Privacy
+                            </a>
+                        </li>
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="container-fluid px-3 px-lg-4 cmcs-main">
+        <main role="main" class="pb-4">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - ContractMonthlyClaimSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="border-top footer cmcs-footer text-muted">
+        <div class="container-fluid px-3 px-lg-4 py-3">
+            &copy; @DateTime.UtcNow.Year Contract Monthly Claim System
+            <span class="text-muted mx-1">·</span>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <span class="text-muted mx-1">·</span>
+            <span class="small">Analysis pack: <code>docs/</code> folder</span>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
-    <!-- Add DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
