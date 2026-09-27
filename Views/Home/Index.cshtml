@@ -1,9 +1,33 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
+<div class="cmcs-hero text-center">
+    <p class="text-uppercase small fw-semibold text-muted mb-2">Contract Monthly Claim System</p>
+    <h1 class="display-5">Monthly claims, clear approvals</h1>
+    <p class="cmcs-lead mt-3">
+        Submit hours and supporting documents in one place. Coordinators and academic managers work from role-based queues with a full audit trail.
+    </p>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    @if (!User.Identity!.IsAuthenticated)
+    {
+        <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+            <a class="btn btn-cmcs-primary btn-lg" asp-area="Identity" asp-page="/Account/Login">
+                <i class="fas fa-sign-in-alt me-1" aria-hidden="true"></i> Sign in
+            </a>
+            <a class="btn btn-outline-secondary btn-lg" asp-area="Identity" asp-page="/Account/Register">
+                Register as lecturer
+            </a>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted mt-3 mb-0">Use the navigation above to open your dashboard or submit a claim.</p>
+    }
+
+    <ul class="cmcs-feature-list list-unstyled">
+        <li class="mb-2"><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Lecturer submission with document upload</li>
+        <li class="mb-2"><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Coordinator and manager approval queues</li>
+        <li class="mb-2"><i class="fas fa-check text-success me-2" aria-hidden="true"></i>Status history for compliance and audit</li>
+    </ul>
 </div>
