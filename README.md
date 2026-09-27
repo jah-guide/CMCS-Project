@@ -29,6 +29,7 @@ Role mapping in the app: **Lecturer**, **Coordinator**, **Manager** (Academic Ma
 
 | Document | Contents |
 |----------|----------|
+| [docs/README.md](./docs/README.md) | **Start here** — analysis pack index |
 | [docs/01-context.md](./docs/01-context.md) | Business context, scope, success measures |
 | [docs/02-stakeholders-raci.md](./docs/02-stakeholders-raci.md) | Stakeholders, personas, RACI |
 | [docs/03-requirements.md](./docs/03-requirements.md) | FR-01…FR-26, NFRs, business rules |
@@ -46,7 +47,7 @@ Role mapping in the app: **Lecturer**, **Coordinator**, **Manager** (Academic Ma
 
 | Layer | Choice |
 |-------|--------|
-| Application | ASP.NET Core **6** MVC |
+| Application | ASP.NET Core **8** MVC |
 | Data | Entity Framework Core, SQL Server (LocalDB in dev) |
 | Security | ASP.NET Core Identity, role-based authorization |
 | UI | Bootstrap 5, jQuery, AJAX approval actions |
@@ -73,7 +74,7 @@ CMCS-Project/
 
 ## Run locally
 
-**Prerequisites:** [.NET 6 SDK](https://dotnet.microsoft.com/download/dotnet/6.0), SQL Server LocalDB (typical Visual Studio install).
+**Prerequisites:** [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0), SQL Server LocalDB (typical Visual Studio install).
 
 1. **Clone** the repository and open a terminal in the project root.
 
@@ -124,5 +125,7 @@ CMCS-Project/
 ## Portfolio note
 
 This repository is curated as a **Systems Analyst showcase** for [jah-guide](https://github.com/jah-guide): analysis-first documentation under `docs/`, with this codebase as the traceable solution increment (PROG6212 Programming 2B — Contract Monthly Claim System).
+
+**Recent refresh:** simplified Mermaid and use-case docs, enterprise Bootstrap layout (`wwwroot/css/site.css`), and role-aware navigation. After clone, run `dotnet tool restore` (if configured) and `libman restore` to pull client libraries into `wwwroot/lib/`.
 
 **License:** see [LICENSE](./LICENSE).
