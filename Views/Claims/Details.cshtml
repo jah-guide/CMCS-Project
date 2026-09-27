@@ -1,16 +1,19 @@
 @model ContractMonthlyClaimSystem.Models.Claim
 
 @{
-    ViewData["Title"] = "Claim Details";
+    ViewData["Title"] = "Claim details";
 }
 
-<h2>Claim Details</h2>
+<div class="cmcs-page-header">
+    <h2><i class="fas fa-file-alt me-2" aria-hidden="true"></i>Claim #@Model.ClaimID</h2>
+    <p class="cmcs-lead">Full submission, documents, and audit trail for this claim.</p>
+</div>
 
 <div class="row">
     <div class="col-md-6">
-        <div class="card">
+        <div class="cmcs-card card">
             <div class="card-header">
-                <h5>Claim Information</h5>
+                <h5 class="mb-0">Claim information</h5>
             </div>
             <div class="card-body">
                 <dl class="row">
@@ -29,15 +32,9 @@
                     <dt class="col-sm-4">Submission Date:</dt>
                     <dd class="col-sm-8">@Model.SubmissionDate.ToString("yyyy-MM-dd")</dd>
 
-                    <dt class="col-sm-4">Current Status:</dt>
+                    <dt class="col-sm-4">Current status:</dt>
                     <dd class="col-sm-8">
-                        <span class="badge
-                            @(Model.CurrentStatus?.StatusName == "Submitted" ? "bg-warning" :
-                                                            Model.CurrentStatus?.StatusName == "ApprovedByCoordinator" ? "bg-info" :
-                                                            Model.CurrentStatus?.StatusName == "ApprovedByManager" ? "bg-success" :
-                                                            Model.CurrentStatus?.StatusName == "Rejected" ? "bg-danger" : "bg-secondary")">
-                            @Model.CurrentStatus?.StatusName
-                        </span>
+                        <partial name="_ClaimStatusBadge" model="@Model.CurrentStatus?.StatusName" />
                     </dd>
 
                     <dt class="col-sm-4">Notes:</dt>
@@ -48,18 +45,18 @@
     </div>
 
     <div class="col-md-6">
-        <div class="card">
+        <div class="cmcs-card card">
             <div class="card-header">
-                <h5>Supporting Documents</h5>
+                <h5 class="mb-0">Supporting documents</h5>
             </div>
             <div class="card-body">
                 @if (Model.SupportingDocuments?.Any() == true)
                 {
-                    <ul class="list-group">
+                    <ul class="list-group list-group-flush">
                         @foreach (var doc in Model.SupportingDocuments)
                         {
-                            <li class="list-group-item">
-                                <i class="fas fa-file"></i> @doc.FileName
+                            <li class="list-group-item px-0">
+                                <i class="fas fa-file me-1" aria-hidden="true"></i> @doc.FileName
                                 <small class="text-muted">(Uploaded: @doc.UploadDate.ToString("yyyy-MM-dd"))</small>
                             </li>
                         }
@@ -67,14 +64,18 @@
                 }
                 else
                 {
-                    <p class="text-muted">No supporting documents uploaded.</p>
+                    <partial name="_EmptyState" model='new ContractMonthlyClaimSystem.Models.EmptyStateViewModel {
+                        Title = "No documents",
+                        Message = "This claim was submitted without supporting files.",
+                        IconClass = "fa-paperclip"
+                    }' />
                 }
             </div>
         </div>
 
-        <div class="card mt-3">
+        <div class="cmcs-card card mt-3">
             <div class="card-header">
-                <h5>Status History</h5>
+                <h5 class="mb-0">Status history</h5>
             </div>
             <div class="card-body">
                 @if (Model.StatusHistory?.Any() == true)
@@ -85,7 +86,7 @@
                             <div class="timeline-item">
                                 <div class="timeline-marker"></div>
                                 <div class="timeline-content">
-                                    <strong>@history.Status?.StatusName</strong>
+                                    <partial name="_ClaimStatusBadge" model="@history.Status?.StatusName" />
                                     <br />
                                     <small>By: @history.ChangedByUser?.FullName</small>
                                     <br />
