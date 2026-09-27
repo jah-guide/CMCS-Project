@@ -1,28 +1,31 @@
 <!-- File: Views/Claims/Create.cshtml - ENHANCED VERSION -->
 @model ContractMonthlyClaimSystem.Models.Claim
+@using ContractMonthlyClaimSystem.Models
 
 @{
     ViewData["Title"] = "Submit New Claim";
-    var user = ViewBag.User as ContractMonthlyClaimSystem.Models.ApplicationUser;
+    var user = ViewBag.User as ApplicationUser;
+    var breadcrumbs = new List<BreadcrumbItem>
+    {
+        new() { Label = "Home", Url = Url.Action("Index", "Home") },
+        new() { Label = "Submit claim" }
+    };
 }
+
+<partial name="_Breadcrumbs" model="breadcrumbs" />
 
 <div class="cmcs-page-header">
     <h2>Submit new claim</h2>
     <p class="cmcs-lead">Enter your hours for the month and attach supporting documents. Totals use your profile hourly rate.</p>
 </div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
-
 <div class="row">
     <div class="col-md-6">
+        <div class="cmcs-card card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-edit me-2" aria-hidden="true"></i>Claim form</h5>
+            </div>
+            <div class="card-body">
         <div id="notificationContainer"></div>
         <form method="post" enctype="multipart/form-data" id="claimForm">
             @Html.AntiForgeryToken()
@@ -105,21 +108,23 @@
                 <ul id="validationErrors"></ul>
             </div>
 
-            <div class="mt-3">
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                    <i class="fas fa-paper-plane"></i> Submit Claim
+            <div class="mt-3 d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-cmcs-primary" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Submit claim
                 </button>
                 <button type="button" class="btn btn-outline-secondary" onclick="saveAsDraft()">
-                    <i class="fas fa-save"></i> Save as Draft
+                    <i class="fas fa-save"></i> Save as draft
                 </button>
-                <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">Cancel</a>
+                <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary">Cancel</a>
             </div>
         </form>
+            </div>
+        </div>
     </div>
 
     <div class="col-md-6">
         <!-- Enhanced Profile Information -->
-        <div class="card">
+        <div class="cmcs-card card">
             <div class="card-header">
                 <h5><i class="fas fa-user-circle"></i> Your Profile Information</h5>
             </div>
@@ -156,9 +161,9 @@
         </div>
 
         <!-- Validation Rules -->
-        <div class="card mt-3">
+        <div class="cmcs-card card mt-3">
             <div class="card-header">
-                <h5><i class="fas fa-info-circle"></i> Validation Rules</h5>
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Validation rules</h5>
             </div>
             <div class="card-body">
                 <ul class="list-unstyled">
