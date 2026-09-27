@@ -1,0 +1,16 @@
+@model ContractMonthlyClaimSystem.Models.EmptyStateViewModel
+
+<div class="cmcs-empty-state text-center py-4 px-3">
+    <div class="cmcs-empty-state-icon mb-3" aria-hidden="true">
+        <i class="fas @Model.IconClass"></i>
+    </div>
+    <h3 class="h5 text-body-emphasis mb-2">@Model.Title</h3>
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <p class="text-muted mb-3 mx-auto cmcs-empty-state-message">@Model.Message</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.ActionUrl) && !string.IsNullOrWhiteSpace(Model.ActionText))
+    {
+        <a href="@Model.ActionUrl" class="btn btn-cmcs-primary">@Model.ActionText</a>
+    }
+</div>
