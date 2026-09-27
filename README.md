@@ -1,10 +1,10 @@
-# Contract Monthly Claim System (CMCS)
+# Enterprise claim approval workflow (CMCS)
 
-**Systems Analyst case study · ASP.NET Core reference implementation**
+**Systems Analyst case study · Contract Monthly Claim System**
 
-CMCS replaces a fragile **paper-and-email** monthly claim process for **independent contractor lecturers** with a structured web workflow: submit hours and evidence, coordinator review, academic manager sign-off, and a durable audit trail.
+CMCS replaces a fragile **paper-and-email** monthly claim process for **independent contractor lecturers** with a governed web workflow: structured submission with evidence, coordinator review, academic manager sign-off, and a durable audit trail suitable for compliance review.
 
-> **Start with the analysis pack:** full business analysis artefacts live in **[`docs/`](./docs/)** — context, requirements, use cases, process models, data design, sequence flows, traceability, and acceptance tests.
+> **Traceability hub:** see **[`docs/08-traceability-matrix.md`](./docs/08-traceability-matrix.md)** for requirements → use cases → acceptance tests → implementation mapping. The full analysis pack lives in **[`docs/`](./docs/)** (context, stakeholders, process models, data design, sequence flows, and UI notes).
 
 ---
 
@@ -37,7 +37,7 @@ Role mapping in the app: **Lecturer**, **Coordinator**, **Manager** (Academic Ma
 | [docs/05-process-as-is-to-be.md](./docs/05-process-as-is-to-be.md) | As-is vs to-be (Mermaid) |
 | [docs/06-data-model.md](./docs/06-data-model.md) | ERD: Claim, Document, User, Status |
 | [docs/07-sequence-flows.md](./docs/07-sequence-flows.md) | Submit → coordinator → manager |
-| [docs/08-traceability-matrix.md](./docs/08-traceability-matrix.md) | Requirements → tests |
+| **[docs/08-traceability-matrix.md](./docs/08-traceability-matrix.md)** | **Requirements → tests (portfolio anchor)** |
 | [docs/10-ui-ux-features.md](./docs/10-ui-ux-features.md) | Shared UI partials, filters, empty states |
 | [docs/09-acceptance-tests.md](./docs/09-acceptance-tests.md) | Manual & automated acceptance |
 | [docs/seed-accounts.md](./docs/seed-accounts.md) | **Local demo only** — seed credentials |
@@ -125,8 +125,12 @@ CMCS-Project/
 
 ## Portfolio note
 
-This repository is curated as a **Systems Analyst showcase** for [jah-guide](https://github.com/jah-guide): analysis-first documentation under `docs/`, with this codebase as the traceable solution increment (PROG6212 Programming 2B — Contract Monthly Claim System).
+This repository is curated as a **Systems Analyst showcase** for [jah-guide](https://github.com/jah-guide): analysis-first documentation under `docs/`, with this codebase as the traceable solution increment.
 
-**Recent refresh:** simplified Mermaid and use-case docs, enterprise Bootstrap layout (`wwwroot/css/site.css`), and role-aware navigation. After clone, run `dotnet tool restore` (if configured) and `libman restore` to pull client libraries into `wwwroot/lib/`.
+After clone, run `dotnet tool restore` (if configured) and `libman restore` to pull client libraries into `wwwroot/lib/`.
 
 **License:** see [LICENSE](./LICENSE).
+
+---
+
+<p align="center"><sub><strong>Origin</strong> · PROG6212 Programming 2B (Contract Monthly Claim System) · Independent contractor claim workflow case study reframed for portfolio use.</sub></p>

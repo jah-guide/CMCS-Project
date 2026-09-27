@@ -6,7 +6,7 @@
 |-------|-------|
 | System | Contract Monthly Claim System (CMCS) |
 | Version | 1.0 (Systems Analyst showcase) |
-| Status | Baseline aligned to ASP.NET Core 6 implementation |
+| Status | Baseline aligned to ASP.NET Core 8 implementation |
 
 ## Functional requirements
 
