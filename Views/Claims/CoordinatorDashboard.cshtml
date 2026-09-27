@@ -1,18 +1,19 @@
 <!-- File: Views/Claims/CoordinatorDashboard.cshtml - ENHANCED -->
 @model List<ContractMonthlyClaimSystem.Services.ClaimWithScore>
 @{
-    ViewData["Title"] = "Coordinator Dashboard - Automated Claim Processing";
+    ViewData["Title"] = "Coordinator queue";
 }
 
-<h2>
-    <i class="fas fa-robot"></i> Coordinator Dashboard - Automated Claim Processing
-</h2>
+<div class="cmcs-page-header">
+    <h2><i class="fas fa-tasks me-2" aria-hidden="true"></i>Coordinator review queue</h2>
+    <p class="cmcs-lead">Review submitted claims, run scoring aids, and approve or reject with a recorded audit trail.</p>
+</div>
 
 <!-- Automation Controls -->
-<div class="card mb-4">
-    <div class="card-header bg-primary text-white">
+<div class="cmcs-card card mb-4">
+    <div class="card-header">
         <h5 class="card-title mb-0">
-            <i class="fas fa-cogs"></i> Automation Controls
+            <i class="fas fa-cogs me-2" aria-hidden="true"></i> Processing tools
         </h5>
     </div>
     <div class="card-body">
@@ -36,54 +37,45 @@
     </div>
 </div>
 
-<!-- Statistics Cards -->
-<div class="row mb-4">
+<div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card text-white bg-primary">
-            <div class="card-body">
-                <h6 class="card-title">Pending Claims</h6>
-                <h3>@Model.Count</h3>
-            </div>
+        <div class="cmcs-stat cmcs-stat--primary p-3">
+            <div class="cmcs-stat-label">Pending</div>
+            <div class="cmcs-stat-value">@Model.Count</div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-success">
-            <div class="card-body">
-                <h6 class="card-title">High Priority</h6>
-                <h3>@Model.Count(c => c.Score.Priority == "High")</h3>
-            </div>
+        <div class="cmcs-stat cmcs-stat--success p-3">
+            <div class="cmcs-stat-label">High priority</div>
+            <div class="cmcs-stat-value">@Model.Count(c => c.Score.Priority == "High")</div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-warning">
-            <div class="card-body">
-                <h6 class="card-title">Auto-Approve Ready</h6>
-                <h3>@Model.Count(c => c.Score.Recommendation == "Auto-Approve")</h3>
-            </div>
+        <div class="cmcs-stat cmcs-stat--warning p-3">
+            <div class="cmcs-stat-label">Auto-approve ready</div>
+            <div class="cmcs-stat-value">@Model.Count(c => c.Score.Recommendation == "Auto-Approve")</div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-info">
-            <div class="card-body">
-                <h6 class="card-title">Avg Score</h6>
-                <h3>@(Model.Any() ? Model.Average(c => c.Score.OverallScore).ToString("F0") : "0")%</h3>
-            </div>
+        <div class="cmcs-stat cmcs-stat--info p-3">
+            <div class="cmcs-stat-label">Average score</div>
+            <div class="cmcs-stat-value">@(Model.Any() ? Model.Average(c => c.Score.OverallScore).ToString("F0") : "0")%</div>
         </div>
     </div>
 </div>
 
 @if (Model.Any())
 {
-    <div class="card">
+    <div class="cmcs-card card">
         <div class="card-header">
             <h5 class="card-title mb-0">
-                <i class="fas fa-tasks"></i> Prioritized Claims Queue
-                <span class="badge bg-secondary">@Model.Count</span>
+                <i class="fas fa-list-ol me-2" aria-hidden="true"></i>Prioritised queue
+                <span class="badge bg-secondary ms-1">@Model.Count</span>
             </h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-hover" id="claimsTable">
+                <table class="table table-striped table-hover cmcs-table" id="claimsTable">
                     <thead>
                         <tr>
                             <th>

@@ -4,7 +4,7 @@
 @inject IClaimAutomationService ClaimAutomationService
 
 @{
-    ViewData["Title"] = "Manager Dashboard - Final Approval";
+    ViewData["Title"] = "Manager approval";
     var claimsWithScores = new List<ClaimWithScore>();
 
     foreach (var claim in Model)
@@ -14,42 +14,34 @@
     }
 }
 
-<h2>
-    <i class="fas fa-user-tie"></i> Manager Dashboard - Final Approval
-</h2>
+<div class="cmcs-page-header">
+    <h2><i class="fas fa-user-tie me-2" aria-hidden="true"></i>Final approval</h2>
+    <p class="cmcs-lead">Claims coordinator-approved appear here for academic sign-off before finance handoff.</p>
+</div>
 
-<!-- Executive Summary -->
-<div class="row mb-4">
+<div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card text-white bg-primary">
-            <div class="card-body">
-                <h6 class="card-title">Pending Final Approval</h6>
-                <h3>@Model.Count()</h3>
-            </div>
+        <div class="cmcs-stat cmcs-stat--primary p-3">
+            <div class="cmcs-stat-label">Awaiting approval</div>
+            <div class="cmcs-stat-value">@Model.Count()</div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-success">
-            <div class="card-body">
-                <h6 class="card-title">Total Amount</h6>
-                <h3>R @Model.Sum(c => c.TotalAmount).ToString("F2")</h3>
-            </div>
+        <div class="cmcs-stat cmcs-stat--success p-3">
+            <div class="cmcs-stat-label">Total amount</div>
+            <div class="cmcs-stat-value" style="font-size:1.25rem;">R @Model.Sum(c => c.TotalAmount).ToString("F2")</div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-warning">
-            <div class="card-body">
-                <h6 class="card-title">High Confidence</h6>
-                <h3>@claimsWithScores.Count(c => c.Score.OverallScore >= 80)</h3>
-            </div>
+        <div class="cmcs-stat cmcs-stat--warning p-3">
+            <div class="cmcs-stat-label">High confidence</div>
+            <div class="cmcs-stat-value">@claimsWithScores.Count(c => c.Score.OverallScore >= 80)</div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-info">
-            <div class="card-body">
-                <h6 class="card-title">Avg Score</h6>
-                <h3>@(claimsWithScores.Any() ? claimsWithScores.Average(c => c.Score.OverallScore).ToString("F0") : "0")%</h3>
-            </div>
+        <div class="cmcs-stat cmcs-stat--info p-3">
+            <div class="cmcs-stat-label">Average score</div>
+            <div class="cmcs-stat-value">@(claimsWithScores.Any() ? claimsWithScores.Average(c => c.Score.OverallScore).ToString("F0") : "0")%</div>
         </div>
     </div>
 </div>
@@ -57,10 +49,10 @@
 @if (Model.Any())
 {
     <!-- Batch Operations -->
-    <div class="card mb-4">
-        <div class="card-header bg-secondary text-white">
+    <div class="cmcs-card card mb-4">
+        <div class="card-header">
             <h5 class="card-title mb-0">
-                <i class="fas fa-layer-group"></i> Batch Operations
+                <i class="fas fa-layer-group me-2" aria-hidden="true"></i>Batch operations
             </h5>
         </div>
         <div class="card-body">
@@ -79,16 +71,16 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="cmcs-card card">
         <div class="card-header">
             <h5 class="card-title mb-0">
-                <i class="fas fa-clipboard-check"></i> Claims Approved by Coordinator - Final Approval
-                <span class="badge bg-secondary">@Model.Count()</span>
+                <i class="fas fa-clipboard-check me-2" aria-hidden="true"></i>Coordinator-approved claims
+                <span class="badge bg-secondary ms-1">@Model.Count()</span>
             </h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-striped table-hover" id="managerClaimsTable">
+                <table class="table table-striped table-hover cmcs-table" id="managerClaimsTable">
                     <thead>
                         <tr>
                             <th>AI Score</th>
