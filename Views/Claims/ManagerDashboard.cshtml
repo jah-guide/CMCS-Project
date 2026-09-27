@@ -79,8 +79,8 @@
             </h5>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover cmcs-table" id="managerClaimsTable">
+            <div class="table-responsive cmcs-table-scroll">
+                <table class="table table-striped table-hover cmcs-table cmcs-table-sticky" id="managerClaimsTable">
                     <thead>
                         <tr>
                             <th>AI Score</th>
@@ -171,8 +171,14 @@
 }
 else
 {
-    <div class="alert alert-info">
-        <i class="fas fa-info-circle"></i> No claims pending final approval.
+    <div class="cmcs-card card">
+        <div class="card-body">
+            <partial name="_EmptyState" model='new ContractMonthlyClaimSystem.Models.EmptyStateViewModel {
+                Title = "Nothing to approve",
+                Message = "Coordinator-approved claims will appear here for your final academic sign-off.",
+                IconClass = "fa-user-tie"
+            }' />
+        </div>
     </div>
 }
 
