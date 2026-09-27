@@ -6,7 +6,10 @@
     var user = ViewBag.User as ContractMonthlyClaimSystem.Models.ApplicationUser;
 }
 
-<h2>Submit New Claim</h2>
+<div class="cmcs-page-header">
+    <h2>Submit new claim</h2>
+    <p class="cmcs-lead">Enter your hours for the month and attach supporting documents. Totals use your profile hourly rate.</p>
+</div>
 
 @if (TempData["Success"] != null)
 {
