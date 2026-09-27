@@ -38,6 +38,7 @@ Role mapping in the app: **Lecturer**, **Coordinator**, **Manager** (Academic Ma
 | [docs/06-data-model.md](./docs/06-data-model.md) | ERD: Claim, Document, User, Status |
 | [docs/07-sequence-flows.md](./docs/07-sequence-flows.md) | Submit → coordinator → manager |
 | [docs/08-traceability-matrix.md](./docs/08-traceability-matrix.md) | Requirements → tests |
+| [docs/10-ui-ux-features.md](./docs/10-ui-ux-features.md) | Shared UI partials, filters, empty states |
 | [docs/09-acceptance-tests.md](./docs/09-acceptance-tests.md) | Manual & automated acceptance |
 | [docs/seed-accounts.md](./docs/seed-accounts.md) | **Local demo only** — seed credentials |
 
